@@ -246,7 +246,7 @@
 
   .checkinContainer{
   width:600px;
-  max-width:6 00px;
+  max-width:600px;
   margin:auto;
   margin-top:40px;
   background:white; 
@@ -623,6 +623,7 @@
   <option value="Study">Study</option>
   <option value="Research">Research</option>
   <option value="Borrow Books">Borrow Books</option>
+  <option value="Others">Others</option>
   </select>
   </div>
 
@@ -815,46 +816,31 @@
 
   };
 
-  window.onload = function(){
-
+window.onload = function() {
   let filterCollege = document.getElementById("filterCollege");
   let regCollege = document.getElementById("regCollege");
 
-  for(let college in collegeCourses){
-
-  let option2 = new Option(college, college);
-  filterCollege.appendChild(option2);
-
-  let option3 = new Option(college, college);
-  regCollege.appendChild(option3);
-
+  for (let college in collegeCourses) {
+    filterCollege.appendChild(new Option(college, college));
+    regCollege.appendChild(new Option(college, college));
   }
 
-  regCollege.addEventListener("change", function(){
-
-  let college = this.value;
-  let regProgram = document.getElementById("regProgram");
-
-  regProgram.innerHTML = "<option>Select Program</option>";
-
-  if(!collegeCourses[college]) return;
-
-  collegeCourses[college].forEach(program => {
-
-  let option = new Option(program, program);
-  regProgram.appendChild(option);
-
+  regCollege.addEventListener("change", function() {
+    let college = this.value;
+    let regProgram = document.getElementById("regProgram");
+    regProgram.innerHTML = "<option>Select Program</option>";
+    if (!collegeCourses[college]) return;
+    collegeCourses[college].forEach(program => {
+      regProgram.appendChild(new Option(program, program));
+    });
   });
 
+  new QRCode(document.getElementById("libraryQR"), {
+    text: "https://czyysabino.github.io/neu-library-visitor/",
+    width: 120,
+    height: 120
   });
-
-  new QRCode(document.getElementById("libraryQR"),{
-  text: "https://czyysabino.github.io/neu-library-visitor/",
-  width:120,
-  height:120
-});
-
-  };
+};
 
   function loadCourses(){
 
@@ -1096,24 +1082,20 @@ weekStart.setDate(today.getDate()-7);
 let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
 db.collection("visits").onSnapshot(snapshot=>{
+    let todayCount=0, weekCount=0, monthCount=0;
 
-let todayCount=0, weekCount=0, monthCount=0;
+    snapshot.forEach(doc=>{
+        let t = doc.data().timestamp;
+        if(!t) return;
+        let time = t.toDate();
+        if(time>=todayStart) todayCount++;
+        if(time>=weekStart) weekCount++;
+        if(time>=monthStart) monthCount++;
+    });
 
-snapshot.forEach(doc=>{
-let t = doc.data().timestamp;
-if(!t) return;
-
-let time = t.toDate();
-
-if(time>=todayStart) todayCount++;
-if(time>=weekStart) weekCount++;
-if(time>=monthStart) monthCount++;
-});
-
-document.getElementById("todayCount").innerText = todayCount;
-document.getElementById("weekCount").innerText = weekCount;
-document.getElementById("monthCount").innerText = monthCount;
-
+    document.getElementById("todayCount").innerText = todayCount;
+    document.getElementById("weekCount").innerText = weekCount;
+    document.getElementById("monthCount").innerText = monthCount;
 });
 }
 
@@ -1181,57 +1163,88 @@ plugins:{legend:{display:false}}
 });
 }
 
-  function filterStatistics(){
+  function filterStatistics() {
+  let start = document.getElementById("startDate").value;
+  let end = document.getElementById("endDate").value;
+  let purpose = document.getElementById("filterPurpose").value;
+  let college = document.getElementById("filterCollege").value;
+  let program = document.getElementById("filterProgram").value;
+  let visitorType = document.getElementById("filterEmployee").value;
 
-  let start=document.getElementById("startDate").value;
-  let end=document.getElementById("endDate").value;
-  let purpose=document.getElementById("filterPurpose").value;
-  let college=document.getElementById("filterCollege").value;
-  let program=document.getElementById("filterProgram").value;
-  let visitorType=document.getElementById("filterEmployee").value;
+  const table = document.getElementById("logs");
+  table.innerHTML = `
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th>College</th>
+    <th>Course</th>
+    <th>Purpose</th>
+    <th>Time</th>
+    <th>Action</th>
+  </tr>`;
 
-  let count=0;
+  db.collection("visits").get().then(snapshot => {
+    snapshot.forEach(async doc => {
+      let data = doc.data();
+      let visitDate = data.timestamp ? data.timestamp.toDate() : null;
+      if (!visitDate) return;
 
-  db.collection("visits").get().then(snapshot=>{
+      if (start && visitDate < new Date(start)) return;
+      if (end) {
+        let endDate = new Date(end);
+        endDate.setHours(23, 59, 59);
+        if (visitDate > endDate) return;
+      }
 
-  snapshot.forEach(doc=>{
+      if (purpose) {
+        if (purpose === "Others") {
+          if (
+            data.purpose === "Study" ||
+            data.purpose === "Research" ||
+            data.purpose === "Borrow Books"
+          ) return;
+        } else {
+          if (data.purpose !== purpose) return;
+        }
+      }
 
-  let data=doc.data();
-  let visitDate=data.timestamp ? data.timestamp.toDate() : null;
+      if (college && data.college !== college) return;
+      if (program && data.course !== program) return;
 
-  if(!visitDate) return;
+      if (visitorType) {
+        if (visitorType === "Faculty") {
+          if (data.visitorType !== "Faculty" && data.visitorType !== "Employee") return;
+        } else {
+          if (data.visitorType !== visitorType) return;
+        }
+      }
 
-  if(start){
-  let startDate=new Date(start);
-  if(visitDate < startDate) return;
-  }
+      let userDoc = await db.collection("users").doc(data.email).get();
+      let userData = userDoc.exists ? userDoc.data() : {};
+      let name = userData.name || data.name || data.email;
+      let blocked = userData.isBlocked;
 
-  if(end){
-  let endDate=new Date(end);
-  endDate.setHours(23,59,59);
-  if(visitDate > endDate) return;
-  }
+      let actionBtn = "";
+      if (admins.includes(currentUserEmail)) {
+        actionBtn = blocked
+          ? `<button style="background:green;color:white" onclick="toggleBlockUser('${data.email}')">Unblock</button>`
+          : `<button style="background:red;color:white" onclick="toggleBlockUser('${data.email}')">Block</button>`;
+      }
 
-  if(purpose && data.purpose !== purpose) return;
-  if(college && data.college !== college) return;
-  if(program && data.course !== program) return;
-  if(visitorType){
-  if(visitorType === "Faculty"){
-    if(data.visitorType !== "Faculty" && data.visitorType !== "Employee") return;
-  } else {
-    if(data.visitorType !== visitorType) return;
-  }
+      let row = `<tr>
+        <td>${name}</td>
+        <td>${data.email}</td>
+        <td>${data.college}</td>
+        <td>${data.course}</td>
+        <td>${data.purpose}</td>
+        <td>${visitDate.toLocaleString()}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+
+      table.innerHTML += row;
+    });
+  });
 }
-
-  count++;
-
-  });
-
-  document.getElementById("todayCount").innerText=count;
-
-  });
-
-  }
 
   function toggleProgram(){
 
@@ -1324,30 +1337,25 @@ plugins:{legend:{display:false}}
 
   let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  let weekCount = 0;
-  let monthCount = 0;
-
   db.collection("visits")
-.where("email","==",email)
-.onSnapshot(snapshot=>{
+  .where("email","==",email)
+  .onSnapshot(snapshot=>{
+      let weekCount = 0;
+      let monthCount = 0;
 
-  snapshot.forEach(doc=>{
+      snapshot.forEach(doc=>{
+          let t = doc.data().timestamp;
+          if(!t) return;
+          let date = t.toDate();
+          if(date >= weekStart) weekCount++;
+          if(date >= monthStart) monthCount++;
+      });
 
-  let t = doc.data().timestamp;
-  if(!t) return;
-
-  let date = t.toDate();
-
-  if(date >= weekStart) weekCount++;
-  if(date >= monthStart) monthCount++;
-
+      document.getElementById("weekVisits").innerText = weekCount;
+      document.getElementById("monthVisits").innerText = monthCount;
   });
 
-  document.getElementById("weekVisits").innerText = weekCount;
-  document.getElementById("monthVisits").innerText = monthCount;
-
-  });
-  }
+}
 
   function showLoader(){
   document.getElementById("loader").style.display = "flex";
@@ -1357,6 +1365,19 @@ function hideLoader(){
   document.getElementById("loader").style.display = "none";
 }
 
+function searchVisitor() {
+    let filter = document.getElementById("searchInput").value.toLowerCase();
+    let table = document.getElementById("logs");
+    let trs = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < trs.length; i++) {
+        let nameTd = trs[i].getElementsByTagName("td")[0];
+        if (nameTd) {
+            let txtValue = nameTd.textContent || nameTd.innerText;
+            trs[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
+        }
+    }
+}
   </script>
   </body>
   </html>
