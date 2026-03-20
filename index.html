@@ -356,52 +356,99 @@
   100%{ transform:rotate(360deg); }
 }
 
-@media (max-width: 768px){  
+@media (max-width: 768px){
+
+  body{
+    font-size:14px;
+  }
+
+  h2, h3{
+    font-size:18px;
+  }
+
   .mainLayout{
     flex-direction: column;
     height: auto;
   }
 
   .leftSide{
-    display: none;
+    display:none;
   }
 
   .rightSide{
-    width: 100%;
-    padding: 20px;
+    width:100%;
+    padding:20px;
   }
 
   .formControl,
   .formButton{
-    width: 90%;
-  }
-
-  #qrContainer{
-    margin-top: 30px;
+    width:90%;
   }
 
   #libraryQR canvas{
-    width: 100px !important;
-    height: 100px !important;
+    width:100px !important;
+    height:100px !important;
   }
 
-  .qrTitle{
-    font-size: 16px;
+
+  #adminDashboard{
+    padding:20px 10px;
+  }
+
+  .card{
+    width:90%;
+    margin:10px auto;
+    display:block;
+  }
+
+  canvas{
+    width:100% !important;
+    height:250px !important;
+  }
+
+  .filterGrid{
+    grid-template-columns:1fr;
+    gap:10px;
+    width:90%;
+  }
+
+  #adminDashboard button{
+    width:90%;
+    margin:15px auto;
+    display:block;
+  }
+
+  #searchInput{
+    width:90% !important;
+    margin:10px auto;
+    display:block;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+    width:100%;
+  }
+
+  th, td{
+    font-size:12px;
+    padding:8px;
   }
 
   .checkinContainer{
-    width: 90%;
-    max-width: 400px;
-    margin: 20px auto;
-    padding: 25px;
+    width:90%;
+    max-width:400px;
+    margin:20px auto;
+    padding:25px;
   }
-  
+
   .statsRow{
-    flex-direction: column;
+    flex-direction:column;
   }
 
   .statBox{
-    width: 100%;
+    width:100%;
   }
 
 }
