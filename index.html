@@ -9,6 +9,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
 
   body{
@@ -241,7 +246,7 @@
 
   .checkinContainer{
   width:600px;
-  max-width:500px;
+  max-width:6 00px;
   margin:auto;
   margin-top:40px;
   background:white; 
@@ -349,6 +354,56 @@
 
 @keyframes spin{
   100%{ transform:rotate(360deg); }
+}
+
+@media (max-width: 768px){  
+  .mainLayout{
+    flex-direction: column;
+    height: auto;
+  }
+
+  .leftSide{
+    display: none;
+  }
+
+  .rightSide{
+    width: 100%;
+    padding: 20px;
+  }
+
+  .formControl,
+  .formButton{
+    width: 90%;
+  }
+
+  #qrContainer{
+    margin-top: 30px;
+  }
+
+  #libraryQR canvas{
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .qrTitle{
+    font-size: 16px;
+  }
+
+  .checkinContainer{
+    width: 90%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 25px;
+  }
+  
+  .statsRow{
+    flex-direction: column;
+  }
+
+  .statBox{
+    width: 100%;
+  }
+
 }
 
   </style>
@@ -747,10 +802,10 @@
   });
 
   new QRCode(document.getElementById("libraryQR"),{
-  text:"https://czyysabino.github.io/neu-library-visitor/?v=2",
-  width:150,
-  height:150
-  });
+  text: "https://czyysabino.github.io/neu-library-visitor/",
+  width:120,
+  height:120
+});
 
   };
 
