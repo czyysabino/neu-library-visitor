@@ -1,0 +1,1260 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <title>NEU Library Visitor System</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+
+  body{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #e6ecf5, #f7f9fc);
+  text-align:center;
+  margin:0;
+  overflow:auto;
+  }
+
+  header{
+  background:#2F539D;
+  color:white;
+  padding:20px;
+  font-size:22px;
+  font-weight:bold;
+  }
+
+  .container{
+  width:90%;
+  max-width:650px;
+  margin:60px auto;
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  button{
+  background:#2F539D; 
+  color:white; 
+  border:none;
+  padding:12px 20px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  transition: all 0.2s ease;
+  }
+
+  button:hover{
+  opacity:0.9;
+  transform: scale(1.03);
+  }
+
+  .formButtons{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-top:10px;
+  }
+
+  #logoutBtn{
+  background:#8C271E;
+  color:white;   
+  display:inline-block;
+  }
+
+  select,
+  input{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  margin-bottom:15px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  font-size:14px;
+  box-sizing:border-box;
+  }
+
+  table{
+  width:90%;
+  margin:30px auto;
+  border-collapse:collapse;
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  th,td{
+  padding:10px;
+  border:1px solid #ddd;
+  }
+
+  th{
+  background:#2F539D;
+  color:white;
+  }
+
+  tr:hover{
+  background:#f5f8ff;
+  }
+
+  .notification{
+  display:none;
+  background:#4CAF50;
+  color:white;
+  padding:15px;
+  margin:20px auto;
+  width:400px;
+  border-radius:6px;
+  font-weight:bold;
+  }
+
+  .card{
+  display:inline-block;
+  width:250px;
+  background:white;
+  margin:15px;
+  padding:20px;
+  border-radius:10px;
+  border-left:5px solid #2F539D;
+  box-shadow:0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.25s ease;
+  text-align:center;
+  }
+
+  #qrContainer{
+  width:100%;
+  margin-top:60px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  }
+
+  .qrTitle{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:15px;
+  }
+
+  #libraryQR{
+  display:flex;
+  justify-content:center;
+  }
+
+  #otherPurpose{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  margin-bottom:15px;
+  }
+
+  #adminDashboard{
+  padding:40px;
+  max-width:1200px;
+  margin:auto;
+}
+
+  #adminDashboard button{
+  margin:0;
+  background:#2F539D;
+  color:white;
+  }
+
+  canvas{
+  max-width:900px;
+  height:350px !important;
+  margin:20px auto;
+  }
+
+  .filterGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  max-width:700px;
+  margin:auto;
+  }
+
+  .adminButtons{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin:10px 0;
+  }
+
+  .mainLayout{
+  display:flex;
+  height:100vh;
+  }
+
+  .leftSide{
+  width:60%;
+  }
+
+  .leftSide img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  }
+
+  .rightSide{
+  width:40%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:#E0E0E0;
+  }
+
+  .logo{
+  width:120px;
+  margin-bottom:20px;
+  border-radius:100%;
+  object-fit:cover;
+  }
+
+  .formControl{
+  width:75%;
+  padding:12px;
+  margin:10px 0;
+  border:1px solid #ccc;
+  border-radius:5px;
+  font-size:14px;
+  box-sizing:border-box;
+  }
+
+  .formButton{
+  width:75%;
+  padding:12px;
+  margin-top:10px;
+  }
+
+  .outlineBtn{
+  background:white;
+  color:#2F539D; 
+  border:2px solid #2F539D; 
+  }
+
+  .checkinContainer{
+  width:600px;
+  max-width:500px;
+  margin:auto;
+  margin-top:40px;
+  background:white; 
+  padding:30px;
+  border-radius:20px;
+  border:none;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  }
+
+  .checkinContainer h2{
+  margin:10px 0 5px;
+  font-size:26px;
+  color:#2F539D;
+  }
+
+  .checkinContainer h4{
+  margin-bottom:20px;
+  font-weight:normal;
+  }
+
+  .statsRow{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:20px;
+  }
+
+  .statBox{
+  flex:1;
+  border:2px solid #333;   
+  border-radius:12px;
+  padding:15px;
+  background:#ffffff;
+  }
+
+  .statBox p{
+  margin:0;
+  font-size:14px;
+  }
+
+  .statBox h2{
+  margin:5px 0 0;
+  }
+
+  .checkinContainer select,
+  .checkinContainer input{
+  background:#f1f1f1;
+  border:none;
+  border-radius:10px;
+  padding:12px;
+  }
+
+  .checkinContainer button{
+  flex:1;
+  border-radius:20px;
+  }
+
+  .checkinContainer .outlineBtn{
+  background:#eee;
+  color:#333;
+  border:none;
+  }
+
+  .card, .statBox, .checkinContainer{
+  transition: all 0.25s ease;
+}
+
+.card:hover, .statBox:hover{
+  transform: translateY(-4px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.12);
+}
+
+#searchInput{
+  border-radius:20px;
+  border:1px solid #ccc;
+  outline:none;
+}
+
+#searchInput:focus{
+  border-color:#2F539D;
+  box-shadow:0 0 5px rgba(47,83,157,0.4);
+}
+
+#loader{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(255,255,255,0.7);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.spinner{
+  width:50px;
+  height:50px;
+  border:6px solid #ddd;
+  border-top:6px solid #2F539D;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  100%{ transform:rotate(360deg); }
+}
+
+  </style>
+  </head>
+
+  <body>
+  
+  <div id="loader" style="display:none;">
+  <div class="spinner"></div>
+  </div>
+
+  <header style="display:flex; justify-content:space-between; align-items:center;">
+  <span>New Era University Library Management System</span>
+  <button id="adminLogoutBtn" onclick="logout()" style="
+    display:none;
+    background:#C62828;
+    color:white;
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+  ">
+    Logout
+  </button>
+</header>
+
+  <div class="notification" id="welcomeBox">
+  Welcome to New Era University Library!
+  </div>
+
+  <div class="mainLayout">
+
+  <div class="leftSide">
+  <img src="library.jpg">
+  </div>
+
+  <div class="rightSide">
+
+  <img src="liblogo.png" class="logo">
+
+  <h3>Login to Access the Library</h3>
+
+  <input type="email" id="loginEmail" class="formControl" placeholder="Institutional Email">
+
+  <input type="password" id="loginPassword" class="formControl" placeholder="Password">
+
+  <button onclick="emailLogin()" class="formButton">Login</button>
+
+  <button onclick="openRegister()" class="outlineBtn formButton">Register Account</button>
+
+  <div id="qrContainer">
+  <div class="qrTitle">Scan to Access in Mobile</div>
+  <div id="libraryQR"></div>
+  </div>
+
+  </div>
+
+  <div id="registerPage" style="display:none;" class="rightSide">
+
+  <img src="liblogo.png" class="logo">
+
+  <h3>Register Your Account</h3>
+
+  <input type="text" id="regName" class="formControl" placeholder="Full Name">
+
+  <input type="email" id="regEmail" class="formControl" placeholder="Institutional Email">
+
+  <input type="password" id="regPassword" class="formControl" placeholder="Password">
+
+  <select id="regVisitorType" class="formControl" onchange="toggleProgram()">
+    
+  <option value="Student">Student</option>
+  <option value="Faculty">Faculty</option>
+  </select>
+
+  <label id="collegeLabel">College</label>
+  <select id="regCollege" class="formControl"></select>
+
+  <label id="programLabel">Program</label>
+  <select id="regProgram" class="formControl"></select>
+
+  <button onclick="registerAccount()" class="formButton">Submit</button>
+
+  <button onclick="backToLogin()" class="outlineBtn formButton">Back</button>
+
+  </div>
+
+  </div>
+
+  <div id="form" style="display:none" class="checkinContainer">
+
+  <img src="liblogo.png" class="logo">
+
+  <h2>Library Check-In</h2>
+  <h4 id="userGreeting">Good day, User</h4>
+
+  <div class="statsRow">
+    <div class="statBox">
+      <p>Your Visits This Week</p>
+      <h2 id="weekVisits">0</h2>
+    </div>
+
+    <div class="statBox">
+      <p>Your Visits This Month</p>
+      <h2 id="monthVisits">0</h2>
+    </div>
+  </div>
+
+  <label>Purpose</label>
+  <select id="purpose" onchange="checkPurpose()">
+  <option value="">Select Purpose</option>
+  <option value="Study">Study</option>
+  <option value="Research">Research</option>
+  <option value="Borrow Books">Borrow Books</option>
+  <option value="Others">Others</option>
+  </select>
+
+  <input type="text" id="otherPurpose" placeholder="Enter Purpose" style="display:none;">
+
+  <div class="formButtons">
+  <button onclick="submitVisit()">Check-In</button>
+  <button id="logoutBtn" class="outlineBtn" onclick="logout()">Logout</button>
+  </div>
+
+  </div>
+
+  <div id="adminDashboard" style="display:none">
+
+  <h2>Library Statistics Dashboard</h2>
+
+  <div class="card">
+  <h3>Visitors Today</h3>
+  <p id="todayCount">0</p>
+  </div>
+
+  <div class="card">
+  <h3>This Week</h3>
+  <p id="weekCount">0</p>
+  </div>
+
+  <div class="card">
+  <h3>This Month</h3>
+  <p id="monthCount">0</p>
+  </div>
+
+  <br>
+
+  <h3>Visitors by College</h3>
+  <canvas id="collegeChart"></canvas>
+
+
+  <h3>Filter Statistics</h3>
+
+  <div class="filterGrid">
+
+  <div>
+  <label>Start Date</label>
+  <input type="date" id="startDate">
+  </div>
+
+  <div>
+  <label>End Date</label>
+  <input type="date" id="endDate">
+  </div>
+
+  <div>
+  <label>Purpose</label>
+  <select id="filterPurpose">
+  <option value="">All</option>
+  <option value="Study">Study</option>
+  <option value="Research">Research</option>
+  <option value="Borrow Books">Borrow Books</option>
+  </select>
+  </div>
+
+  <div>
+  <label>College</label>
+  <select id="filterCollege" onchange="loadFilterPrograms()">
+  <option value="">All</option>
+  </select>
+  </div>
+
+  <div>
+  <label>Program</label>
+  <select id="filterProgram">
+  <option value="">All</option>
+  </select>
+  </div>
+
+  <div>
+  <label>Visitor Type</label>
+  <select id="filterEmployee">
+  <option value="">All</option>
+  <option value="Student">Student</option>
+  <option value="Faculty">Faculty</option>
+  </select>
+  </div>
+
+  </div>
+
+  <button onclick="filterStatistics()">Apply Filters</button>
+
+  <h3>Visitor Logs</h3>
+
+  <input type="text" id="searchInput" placeholder="Search visitor name..." onkeyup="searchVisitor()" style="width:300px;padding:8px">
+
+  <table id="logs">
+  <tr>
+  <th>Name</th>
+  <th>Email</th>
+  <th>College</th>
+  <th>Course</th>
+  <th>Purpose</th>
+  <th>Time</th>
+  <th>Action</th>
+  </tr>
+  </table>
+
+  <script>
+
+  const firebaseConfig={
+  apiKey:"AIzaSyBcjTl_qLQNUgsnd56urOc7YcXE2hymFS0",
+  authDomain:"neu-library-visitor-czy.firebaseapp.com",
+  projectId:"neu-library-visitor-czy"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  const auth=firebase.auth();
+  const db=firebase.firestore();
+
+  let collegeChartInstance = null;
+  let currentUserEmail = "";
+  let logsListener = null;
+
+  function showWelcome(message = "Welcome to New Era University Library!"){
+  let box=document.getElementById("welcomeBox");
+
+  box.innerText = message;
+  box.style.display="block";
+
+  setTimeout(()=>{box.style.display="none"},3000);
+  }
+
+  auth.onAuthStateChanged(user=>{
+  if(user){
+  currentUserEmail = user.email;
+  }
+  });
+
+  let manualUserName="";
+  let manualUserEmail="";
+
+  const admins=[
+  "admin@neu.edu.ph",
+  "librarian@neu.edu.ph",
+  "jcesperanza@neu.edu.ph"
+  ];
+
+  const collegeCourses = {
+
+  "College of Accountancy":[
+  "BS Accountancy",
+  "BS Accounting Information System"
+  ],
+
+  "College of Agriculture":[
+  "BS Agriculture"
+  ],
+
+  "College of Arts and Sciences":[
+  "BA Economics",
+  "BS Psychology",
+  "BA Public Administration",
+  "BS Biology",
+  "AB Political Science"
+  ],
+
+  "College of Business Administration":[
+  "BS Real Estate Management",
+  "BSBA Marketing Management",
+  "BSBA Human Resource Development and Management",
+  "BSBA Legal Management",
+  "BS Entrepreneur",
+  "BSBA Financial Management"
+  ],
+
+  "College of Communication":[
+  "BA Communication",
+  "BA Broadcasting",
+  "BA Journalism"
+  ],
+
+  "College of Informatics and Computing Studies":[
+  "Bachelor of Library Information Science",
+  "BS Information Technology",
+  "BS Information Systems",
+  "BSEMC Game Development",
+  "BSEMC Digital Animation",
+  "BS Computer Science"
+  ],
+
+  "College of Criminology":[
+  "BS Criminology"
+  ],
+
+  "College of Education":[
+  "BSEd Filipino",
+  "BSEd Mathematics",
+  "BSEd Biological Sciences",
+  "BSEd Physical Sciences",
+  "BEEd General Sciences",
+  "BEEd Special Education",
+  "BEEd Content Courses",
+  "BSEd Technology and Livelihood Education",
+  "BEEd Pre-School Education",
+  "BSEd MAPE",
+  "BSEd English",
+  "BSEd Social Studies"
+  ],
+
+  "College of Engineering and Architecture":[
+  "BS Astronomy",
+  "BS Industrial Engineering",
+  "BS Mechanical Engineering",
+  "BS Architecture",
+  "BS Electronics Engineering",
+  "BS Electrical Engineering",
+  "BS Civil Engineering"
+  ],
+
+  "School of International Relations":[
+  "BA Foreign Service"
+  ],
+
+  "College of Medical Technology":[
+  "BS Medical Technology"
+  ],
+
+  "College of Midwifery":[
+  "BS Midwifery"
+  ],
+
+  "College of Music":[
+  "BM Choral Conducting",
+  "BM Piano",
+  "BM Voice",
+  "BM Music Education"
+  ],
+
+  "College of Nursing":[
+  "BS Nursing"
+  ],
+
+  "College of Physical Therapy":[
+  "BS Physical Therapy"
+  ],
+
+  "College of Respiratory Therapy":[
+  "BS Respiratory Therapy"
+  ]
+
+  };
+
+  window.onload = function(){
+
+  let filterCollege = document.getElementById("filterCollege");
+  let regCollege = document.getElementById("regCollege");
+
+  for(let college in collegeCourses){
+
+  let option2 = new Option(college, college);
+  filterCollege.appendChild(option2);
+
+  let option3 = new Option(college, college);
+  regCollege.appendChild(option3);
+
+  }
+
+  regCollege.addEventListener("change", function(){
+
+  let college = this.value;
+  let regProgram = document.getElementById("regProgram");
+
+  regProgram.innerHTML = "<option>Select Program</option>";
+
+  if(!collegeCourses[college]) return;
+
+  collegeCourses[college].forEach(program => {
+
+  let option = new Option(program, program);
+  regProgram.appendChild(option);
+
+  });
+
+  });
+
+  new QRCode(document.getElementById("libraryQR"),{
+  text:"https://czyysabino.github.io/neu-library-visitor/?v=2",
+  width:150,
+  height:150
+  });
+
+  };
+
+  function loadCourses(){
+
+  let college=document.getElementById("college").value;
+  let courseSelect=document.getElementById("course");
+
+  courseSelect.innerHTML="<option>Select Course</option>";
+
+  if(!collegeCourses[college]) return;
+
+  collegeCourses[college].forEach(function(course){
+
+  let option=document.createElement("option");
+  option.value=course;
+  option.textContent=course;
+  courseSelect.appendChild(option);
+
+  });
+
+  }
+
+  function loadFilterPrograms(){
+
+  let college=document.getElementById("filterCollege").value;
+  let programSelect=document.getElementById("filterProgram");
+
+  programSelect.innerHTML="<option value=''>All</option>";
+
+  if(!collegeCourses[college]) return;
+
+  collegeCourses[college].forEach(program=>{
+
+  let option=document.createElement("option");
+  option.value=program;
+  option.textContent=program;
+
+  programSelect.appendChild(option);
+
+  });
+
+  }
+
+async function emailLogin(){
+
+  showLoader(); 
+
+let email = document.getElementById("loginEmail").value;
+let password = document.getElementById("loginPassword").value;
+
+try{
+
+let userCredential = await auth.signInWithEmailAndPassword(email,password);
+let user = userCredential.user;
+
+currentUserEmail = user.email;
+
+let doc = await db.collection("users").doc(email).get();
+
+let name = doc.exists ? doc.data().name : user.email;
+
+document.getElementById("userGreeting").innerText =
+"Good day, " + name;
+
+if(doc.exists && doc.data().role === "admin"){
+    hideLoader();
+    showAdminDashboard();
+    return;
+}
+
+document.querySelector(".mainLayout").style.display = "none";
+document.getElementById("form").style.display="block";
+document.getElementById("logoutBtn").style.display = "inline-block";
+
+hideLoader(); 
+showWelcome();
+loadUserStats();
+
+}catch(error){
+hideLoader(); 
+alert(error.message);
+}
+}
+
+  function logout(){
+  auth.signOut();
+  location.reload();
+  }
+
+function submitVisit(){
+
+let email = manualUserEmail || (auth.currentUser ? auth.currentUser.email : "");
+
+document.querySelector(".mainLayout").style.display="none";
+document.getElementById("form").style.display="block";
+
+db.collection("users").doc(email).get().then(doc=>{
+
+if(doc.exists && doc.data().isBlocked){
+alert("You are blocked from submitting visits.");
+return;
+}
+
+let userDoc = doc.data();
+
+let name = userDoc.name || email;
+let college = userDoc.college || "N/A";
+let course = userDoc.program || "N/A";
+let visitorType = userDoc.visitorType || "User";
+let purpose = document.getElementById("purpose").value;
+
+if(purpose === ""){
+alert("Please select a purpose");
+return;
+}
+
+if(purpose === "Others"){
+purpose = document.getElementById("otherPurpose").value;
+
+if(purpose.trim() === ""){
+alert("Please enter your purpose");
+return;
+}
+}
+
+if(!college || college === "N/A"){
+alert("Your account has no college set. Please contact admin.");
+return;
+}
+
+showLoader();
+
+db.collection("visits").add({
+  name,
+  email,
+  college,
+  course,
+  purpose,
+  visitorType,
+  timestamp: firebase.firestore.FieldValue.serverTimestamp()
+})
+.then(() => {
+  hideLoader(); 
+  showWelcome("Check-In Successful");
+  loadUserStats();
+})
+.catch(() => {
+  hideLoader();
+});
+
+}); 
+
+}
+
+function loadLogs(){
+
+if(logsListener){
+  logsListener();
+}
+
+const table = document.getElementById("logs");
+
+logsListener = db.collection("visits")
+.orderBy("timestamp","desc")
+.onSnapshot(async snapshot=>{
+
+table.innerHTML = `
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>College</th>
+<th>Course</th>
+<th>Purpose</th>
+<th>Time</th>
+<th>Action</th>
+</tr>`;
+
+for(const doc of snapshot.docs){
+
+let data = doc.data();
+let time = data.timestamp ? data.timestamp.toDate().toLocaleString() : "";
+
+let userDoc = await db.collection("users").doc(data.email).get();
+let userData = userDoc.exists ? userDoc.data() : {};
+
+let name = userData.name || data.name || data.email;
+
+let row = `<tr>
+<td>${name}</td>
+<td>${data.email}</td>
+<td>${data.college}</td>
+<td>${data.course}</td>
+<td>${data.purpose}</td>
+<td>${time}</td>`;
+
+if(admins.includes(currentUserEmail)){
+let blocked = userData.isBlocked;
+
+let button = blocked
+? `<button style="background:green;color:white" onclick="toggleBlockUser('${data.email}')">Unblock</button>`
+: `<button style="background:red;color:white" onclick="toggleBlockUser('${data.email}')">Block</button>`;
+
+row += `<td>${button}</td></tr>`;
+}else{
+row += `<td></td></tr>`;
+}
+
+table.innerHTML += row;
+}
+
+});
+}
+
+  function showAdminDashboard(){
+
+    document.getElementById("adminLogoutBtn").style.display = "inline-block";
+
+  let layout = document.querySelector(".mainLayout");
+
+  if(layout){
+      layout.style.display = "none";
+  }
+
+  document.getElementById("form").style.display = "none";
+  document.getElementById("adminDashboard").style.display = "block";
+
+  loadStatistics();
+  loadCollegeChart();
+  loadLogs(); 
+  }
+
+function loadStatistics(){
+
+let today = new Date();
+let todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+let weekStart = new Date();
+weekStart.setDate(today.getDate()-7);
+
+let monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+db.collection("visits").onSnapshot(snapshot=>{
+
+let todayCount=0, weekCount=0, monthCount=0;
+
+snapshot.forEach(doc=>{
+let t = doc.data().timestamp;
+if(!t) return;
+
+let time = t.toDate();
+
+if(time>=todayStart) todayCount++;
+if(time>=weekStart) weekCount++;
+if(time>=monthStart) monthCount++;
+});
+
+document.getElementById("todayCount").innerText = todayCount;
+document.getElementById("weekCount").innerText = weekCount;
+document.getElementById("monthCount").innerText = monthCount;
+
+});
+}
+
+  function checkPurpose(){
+
+  let purpose = document.getElementById("purpose").value;
+
+  if(purpose === "Others"){
+  document.getElementById("otherPurpose").style.display = "block";
+  }
+  else{
+  document.getElementById("otherPurpose").style.display = "none";
+
+  }
+
+  }
+
+  function toggleBlockUser(email){
+
+  db.collection("users").doc(email).get().then(doc=>{
+
+  let isBlocked = doc.exists && doc.data().isBlocked;
+
+  db.collection("users").doc(email).set({
+  isBlocked: !isBlocked
+  },{merge:true});
+
+  alert(!isBlocked ? "User has been BLOCKED" : "User has been UNBLOCKED");
+
+  });
+
+  }
+
+function loadCollegeChart(){
+
+db.collection("visits").onSnapshot(snapshot=>{
+
+let colleges = {};
+
+snapshot.forEach(doc=>{
+let c = doc.data().college || "N/A";
+colleges[c] = (colleges[c] || 0) + 1;
+});
+
+if(collegeChartInstance){
+  collegeChartInstance.destroy();
+}
+
+collegeChartInstance = new Chart(document.getElementById("collegeChart"),{
+type:"bar",
+data:{
+labels:Object.keys(colleges),
+datasets:[{
+label:"Visitors by College",
+data:Object.values(colleges),
+backgroundColor:"#2F539D"
+}]
+},
+options:{
+responsive:true,
+plugins:{legend:{display:false}}
+}
+});
+
+});
+}
+
+  function filterStatistics(){
+
+  let start=document.getElementById("startDate").value;
+  let end=document.getElementById("endDate").value;
+  let purpose=document.getElementById("filterPurpose").value;
+  let college=document.getElementById("filterCollege").value;
+  let program=document.getElementById("filterProgram").value;
+  let visitorType=document.getElementById("filterEmployee").value;
+
+  let count=0;
+
+  db.collection("visits").get().then(snapshot=>{
+
+  snapshot.forEach(doc=>{
+
+  let data=doc.data();
+  let visitDate=data.timestamp ? data.timestamp.toDate() : null;
+
+  if(!visitDate) return;
+
+  if(start){
+  let startDate=new Date(start);
+  if(visitDate < startDate) return;
+  }
+
+  if(end){
+  let endDate=new Date(end);
+  endDate.setHours(23,59,59);
+  if(visitDate > endDate) return;
+  }
+
+  if(purpose && data.purpose !== purpose) return;
+  if(college && data.college !== college) return;
+  if(program && data.course !== program) return;
+  if(visitorType){
+  if(visitorType === "Faculty"){
+    if(data.visitorType !== "Faculty" && data.visitorType !== "Employee") return;
+  } else {
+    if(data.visitorType !== visitorType) return;
+  }
+}
+
+  count++;
+
+  });
+
+  document.getElementById("todayCount").innerText=count;
+
+  });
+
+  }
+
+  function toggleProgram(){
+
+  let type = document.getElementById("regVisitorType").value;
+  let program = document.getElementById("regProgram");
+  let label = document.getElementById("programLabel"); 
+
+  if(type === "Faculty"){
+      program.style.display = "none";
+      label.style.display = "none"; 
+  }else{
+      program.style.display = "block";
+      label.style.display = "block";
+  }
+
+  }
+
+  function registerAccount(){
+
+  let name = document.getElementById("regName").value.trim();
+  let email = document.getElementById("regEmail").value.trim();
+  let password = document.getElementById("regPassword").value.trim();
+  let college = document.getElementById("regCollege").value;
+  let program = document.getElementById("regProgram").value;
+  let type = document.getElementById("regVisitorType").value;
+
+  if(name === "" || email === "" || password === ""){
+  alert("Please fill all fields");
+  return;
+  }
+
+  if(password.length < 6){
+  alert("Password must be at least 6 characters");
+  return;
+  }
+
+  if(!email.endsWith("@neu.edu.ph")){
+  alert("Use NEU email only");
+  return;
+  }
+
+  auth.createUserWithEmailAndPassword(email,password)
+
+  .then(userCredential=>{
+
+  db.collection("users").doc(email).set({
+  name,
+  email,
+  college,
+  program: type==="Student"?program:"",
+  visitorType:type,
+  role:"user",
+  isBlocked:false
+  });
+
+  alert("Account created successfully! You can now login.");
+
+  backToLogin();
+
+  })
+
+  .catch(error=>{
+  alert(error.message);
+  });
+
+  }
+
+  function openRegister(){
+
+  document.querySelectorAll(".rightSide")[0].style.display="none";
+  document.getElementById("registerPage").style.display="flex";
+
+  }
+
+  function backToLogin(){
+
+  document.getElementById("registerPage").style.display="none";
+  document.querySelectorAll(".rightSide")[0].style.display="flex";
+
+  }
+
+  function loadUserStats(){
+
+  let email = auth.currentUser.email;
+
+  let now = new Date();
+
+  let weekStart = new Date();
+  weekStart.setDate(now.getDate() - 7);
+
+  let monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  let weekCount = 0;
+  let monthCount = 0;
+
+  db.collection("visits")
+.where("email","==",email)
+.onSnapshot(snapshot=>{
+
+  snapshot.forEach(doc=>{
+
+  let t = doc.data().timestamp;
+  if(!t) return;
+
+  let date = t.toDate();
+
+  if(date >= weekStart) weekCount++;
+  if(date >= monthStart) monthCount++;
+
+  });
+
+  document.getElementById("weekVisits").innerText = weekCount;
+  document.getElementById("monthVisits").innerText = monthCount;
+
+  });
+  }
+
+  function showLoader(){
+  document.getElementById("loader").style.display = "flex";
+}
+
+function hideLoader(){
+  document.getElementById("loader").style.display = "none";
+}
+
+  </script>
+  </body>
+  </html>
